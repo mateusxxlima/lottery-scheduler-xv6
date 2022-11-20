@@ -1,14 +1,18 @@
-// Test that fork fails gracefully.
-// Tiny executable so that the limit can be filling the proc table.
-
 #include "types.h"
 #include "stat.h"
 #include "user.h"
 
-#define TICKETS_PROCESS_1 20
-#define TICKETS_PROCESS_2 30
-#define TICKETS_PROCESS_3 50
+
+//  Aqui é possível definir o número de tickets para cada processo filho, sendo que
+//  cada processo executa a mesma função fibonacci que recebe um valor por parâmetro (N_FIB),
+//  esse valor inicialmente é definido em 40, porém também pode ser ajustado.
+//  Os valores definidos aqui devem estar no intervalo entre MIN_TICKETS e MAX_TICKETS(inclusive)
+//###############################
+#define TICKETS_PROCESS_1 3
+#define TICKETS_PROCESS_2 2
+#define TICKETS_PROCESS_3 1
 #define N_FIB 40
+//################################
 
 void printf(int fd, const char *s, ...) {
   write(fd, s, strlen(s));

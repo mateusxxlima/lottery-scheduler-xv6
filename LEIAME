@@ -1,0 +1,43 @@
+UFFS - Campus Chapecó - Curso de Ciência da Computação
+CCR: Sistemas Operacionais – 2022.2
+Prof. Marco Aurélio Spohn
+
+Alunos: Mateus de Lima, Gustavo Zanella
+
+
+O TRABALHO:
+
+    Neste trabalho fizemos uma implementação de um algoritmo de escalonamento do tipo loteria,
+onde a cada iteração do escalonador é feito um sorteio para saber qual processo será sorteado e receberá tempo de CPU, quanto
+maior o número de bilhetes que um processo tem, maior a chance de ele ser sorteado.
+    Também foi definido um valor máximo e mínimo aceitavel de bilhetes para cada processo, onde se o valor recebido estiver fora
+desse intervalo, o sistema definirá de forma automática o valor mínimo padrão de bilhetes para esse processo(esses valores "mínimo" e
+ "máximo" podem ser ajustados no inicio do arquivo proc.c).
+
+
+TESTE:
+
+    Criamos também um teste para garantir que o algoritmo do escalonador está funcionando corretamente, então no arquivo forktest.c
+criamos três processos filhos, onde todos eles chamam uma mesma função fibonacci, sendo que para cada fork passamos um número diferente 
+de bilhetes(esses valores podem ser ajustados no início do arquivo forktest.c).
+    Então após definir o número de bilhetes para cada processo filho, sendo que estes valores devem estar dentro do intervalo definido 
+como mínimo e máximo no arquivo proc.c, espera-se que o processo que recebeu um número maior de bilhetes termine por primeiro e em 
+sequência termine o segundo com maior número de bilhetes e por último o que recebeu menor número de bilhetes.
+    
+
+Ajuste do valor mínimo é máximo de bilhetes aceito pelo sistema --> início do arquivo proc.c
+Ajuste do número de bilhetes passados para cada processo filho do teste --> início do arquivo forktest.c
+O código do escalonado pode ser encontrado no arquivo proc.c a partir da linha 419.
+
+--> Para executar o xv6 rode a sequência de comandos:
+    --> sudo apt install qemu-system-i386
+    --> sudo apt install libc6-dev-i386
+    --> chmod 700 -R xv6
+    --> cd xv6
+    --> make
+    --> make qemu ou (make qemu-nox)
+
+--> Para testar o escalonador implementado execute o forktest:
+    --> forktest
+    OBS: Ajuste o número de bilhetes no início do arquivo forktest.c, também é possível ajustar o valor que a função
+        fibonacci vai calcular.

@@ -7,8 +7,13 @@
 #include "proc.h"
 #include "spinlock.h"
 
-#define MIN_TICKETS 10
-#define MAX_TICKETS 100
+// Aqui é possível definir o MIN_TICKETS e o MAX_TICKETS
+// qualquer valor que a função fork receber que não estiver nesse intervalo,
+// será ajustado para MIN_TICKETS de forma automática pelo sistema. 
+//#####################
+#define MIN_TICKETS 1
+#define MAX_TICKETS 10
+//#####################
 
 #define N 624
 #define M 397
@@ -382,6 +387,7 @@ long genrand() {
 }
 
 long get_random(long max) {
+
   unsigned long
     num_bins = (unsigned long) max,
     num_rand = (unsigned long) RAND_MAX + 1,
@@ -393,12 +399,22 @@ long get_random(long max) {
    x = genrand();
   }
   while (num_rand - defect <= (unsigned long)x);
-  long xpt = x/bin_size + 1;
-  return xpt;
+  long tmp = x/bin_size + 1;
+  return tmp;
 }
 // End random number
 //######################################
 
+int get_total_tickets() {
+  int total_tickets = 0;
+  struct proc *p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    if(p->state != RUNNABLE) continue;
+
+    total_tickets += p->tickets;
+  }
+  return total_tickets;
+}
 
 void scheduler(void) {
   struct proc *p;
@@ -407,61 +423,24 @@ void scheduler(void) {
   int sum_tickets, total_tickets;
   long num_rand;
   
-  for(;;) {
-
+  while (1) {
     sti();
     acquire(&ptable.lock);
 
-    p = ptable.proc;
-    cprintf("######## Name: %s; pid: %d; tickets: %d\n", p->name, p->pid, p->tickets);
-
-    total_tickets = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
       if(p->state != RUNNABLE) continue;
 
-      total_tickets += p->tickets;
-    }
+      total_tickets = get_total_tickets();
+      num_rand = get_random(total_tickets);
 
-    num_rand = get_random(total_tickets);
+      sum_tickets = 0;
+      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if(p->state != RUNNABLE) continue;
 
-    sum_tickets = 0;
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-      if(p->state != RUNNABLE) continue;
-
-      sum_tickets += p->tickets;
-      if (num_rand > sum_tickets) continue;
-      else break;
-    }
-
-    
-/*     cprintf("######## total_tickets: %d\n", total_tickets);
-    cprintf("######## num_random: %d\n", num_rand);
-    cprintf("######## sum_tickets: %d\n", sum_tickets);
-    cprintf("######## Name: %s; pid: %d; tickets: %d\n", p->name, p->pid, p->tickets); */
-
-    c->proc = p;
-    switchuvm(p);
-    p->state = RUNNING;
-    swtch(&(c->scheduler), p->context);
-    switchkvm();
-    c->proc = 0;
-
-    release(&ptable.lock);
-  }
-}
-
-/* void scheduler(void) {
-  struct proc *p;
-  struct cpu *c = mycpu();
-  c->proc = 0;
-  for(;;){
-    sti();
-    acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
-      //cprintf("Name: %s; pid: %d; tickets: %d\n", p->name, p->pid, p->tickets);
-      cprintf("Random: %d\n", get_random(3));
+        sum_tickets += p->tickets;
+        if (num_rand > sum_tickets) continue;
+        break;
+      }
 
       c->proc = p;
       switchuvm(p);
@@ -469,10 +448,12 @@ void scheduler(void) {
       swtch(&(c->scheduler), p->context);
       switchkvm();
       c->proc = 0;
+
     }
+
     release(&ptable.lock);
   }
-} */
+}
 
 // Enter scheduler.  Must hold only ptable.lock
 // and have changed proc->state. Saves and restores
