@@ -8,8 +8,10 @@
 #include "spinlock.h"
 
 // Aqui é possível definir o MIN_TICKETS e o MAX_TICKETS
-// qualquer valor que a função fork receber que não estiver nesse intervalo,
-// será ajustado para MIN_TICKETS de forma automática pelo sistema. 
+// qualquer valor de tickets que a função fork receber que não estiver nesse intervalo
+// será ajustado de forma automática pelo sistema, sendo que:
+// recebera MIN_TICKETS caso esse valor recebido seja menor que o próprio MIN_TICKETS 
+// ou não exista e receberá MAX_TICKETS caso seja maior que MAX_TICKETS
 //#####################
 #define MIN_TICKETS 1
 #define MAX_TICKETS 10
@@ -211,7 +213,9 @@ int fork(int tickets) {
     return -1;
   }
 
-  if (!tickets || tickets < 0) {
+
+  // Verifica e ajusta o número de tickets do processo
+  if (!tickets || tickets < MIN_TICKETS) {
     np->tickets = MIN_TICKETS;
   } else if (tickets > MAX_TICKETS) {
     np->tickets = MAX_TICKETS;
@@ -416,39 +420,51 @@ int get_total_tickets() {
   return total_tickets;
 }
 
+int get_runnables() {
+  struct proc *p;
+  int count = 0;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    if(p->state == RUNNABLE) count++;
+  }
+  return count;
+}
+
+// Função que sorteia um processo para ser executado, porém esse sorteio não é totalmente
+// aleatório, pois cada processo contém um número de tickets, e quanto mais tickets um 
+// processo têm, maior a chance de ele ser sorteado
+struct proc* lottery_scheduling() {
+  int sum_tickets, total_tickets;
+  long num_rand;
+  struct proc *p;
+  total_tickets = get_total_tickets();
+  num_rand = get_random(total_tickets);
+  sum_tickets = 0;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    if(p->state != RUNNABLE) continue;
+    sum_tickets += p->tickets;
+    if (num_rand > sum_tickets) continue;
+    break;
+  }
+  return p;
+}
+
 void scheduler(void) {
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
-  int sum_tickets, total_tickets;
-  long num_rand;
   
   while (1) {
     sti();
     acquire(&ptable.lock);
-
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-      if(p->state != RUNNABLE) continue;
-
-      total_tickets = get_total_tickets();
-      num_rand = get_random(total_tickets);
-
-      sum_tickets = 0;
-      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-        if(p->state != RUNNABLE) continue;
-
-        sum_tickets += p->tickets;
-        if (num_rand > sum_tickets) continue;
-        break;
-      }
-
+    int runnables = get_runnables();
+    for(int i = 0; i < runnables; i++) {
+      p = lottery_scheduling();
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
       swtch(&(c->scheduler), p->context);
       switchkvm();
       c->proc = 0;
-
     }
 
     release(&ptable.lock);

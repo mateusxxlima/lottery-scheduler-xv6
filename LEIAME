@@ -2,32 +2,35 @@ UFFS - Campus Chapecó - Curso de Ciência da Computação
 CCR: Sistemas Operacionais – 2022.2
 Prof. Marco Aurélio Spohn
 
-Alunos: Mateus de Lima, Gustavo Zanella
+Aluno: Mateus de Lima
 
 
 O TRABALHO:
 
-    Neste trabalho fizemos uma implementação de um algoritmo de escalonamento do tipo loteria,
-onde a cada iteração do escalonador é feito um sorteio para saber qual processo será sorteado e receberá tempo de CPU, quanto
-maior o número de bilhetes que um processo tem, maior a chance de ele ser sorteado.
-    Também foi definido um valor máximo e mínimo aceitavel de bilhetes para cada processo, onde se o valor recebido estiver fora
-desse intervalo, o sistema definirá de forma automática o valor mínimo padrão de bilhetes para esse processo(esses valores "mínimo" e
- "máximo" podem ser ajustados no inicio do arquivo proc.c).
+    Neste trabalho foi feita a implementação de um algoritmo de escalonamento do tipo loteria,
+onde a cada iteração do escalonador é feito um sorteio para saber qual processo será selecionado para ser 
+executado, quanto maior o número de tickets de um processo, maior a chance de ele ser sorteado.
+    Também foram definidos valores máximos e mínimos de tickets que um processo pode ter, e se o valor recebido
+pela função fork estiver fora desse intervalo, o sistema ajustará de forma automática o número de tickets para 
+o processo, sendo que se receber um valor menor que MIN_TICKETS ou não receber nenhum valor o valor de tickets
+será ajustado para MIN_TICKETS, e se o valor recebido for maior que MAX_TICKETS, então o valor
+de tickets será ajustado para o próprio MAX_TICKETS(esses valores "mínimo" e "máximo" podem ser ajustados
+ no inicio do arquivo proc.c).
 
 
 TESTE:
 
-    Criamos também um teste para garantir que o algoritmo do escalonador está funcionando corretamente, então no arquivo forktest.c
-criamos três processos filhos, onde todos eles chamam uma mesma função fibonacci, sendo que para cada fork passamos um número diferente 
+    Foi criado também um teste para garantir que o algoritmo do escalonador está funcionando corretamente, então no arquivo forktest.c
+criamos três processos, onde todos eles chamam uma mesma função fibonacci, sendo que para cada fork passamos um número diferente 
 de bilhetes(esses valores podem ser ajustados no início do arquivo forktest.c).
     Então após definir o número de bilhetes para cada processo filho, sendo que estes valores devem estar dentro do intervalo definido 
 como mínimo e máximo no arquivo proc.c, espera-se que o processo que recebeu um número maior de bilhetes termine por primeiro e em 
 sequência termine o segundo com maior número de bilhetes e por último o que recebeu menor número de bilhetes.
     
 
-Ajuste do valor mínimo é máximo de bilhetes aceito pelo sistema --> início do arquivo proc.c
+Ajuste do valor mínimo e máximo de bilhetes aceito pelo sistema --> início do arquivo proc.c
 Ajuste do número de bilhetes passados para cada processo filho do teste --> início do arquivo forktest.c
-O código do escalonado pode ser encontrado no arquivo proc.c a partir da linha 419.
+O código do escalonador pode ser encontrado no arquivo proc.c a partir da linha 451.
 
 --> Para executar o xv6 rode a sequência de comandos:
     --> sudo apt install qemu-system-i386

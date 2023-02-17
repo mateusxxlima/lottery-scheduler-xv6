@@ -6,7 +6,8 @@
 //  Aqui é possível definir o número de tickets para cada processo filho, sendo que
 //  cada processo executa a mesma função fibonacci que recebe um valor por parâmetro (N_FIB),
 //  esse valor inicialmente é definido em 40, porém também pode ser ajustado.
-//  Os valores definidos aqui devem estar no intervalo entre MIN_TICKETS e MAX_TICKETS(inclusive)
+//  Os valores definidos aqui devem estar no intervalo entre MIN_TICKETS e
+//  MAX_TICKETS(inclusive) definidos no inicio do arquivo proc.c
 //###############################
 #define TICKETS_PROCESS_1 3
 #define TICKETS_PROCESS_2 2
